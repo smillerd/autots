@@ -7,4 +7,5 @@ autots is built on the shoulders of giants. The following open source packages a
 required for autots to work.
 * Pandas
 * urllib
+* argparse
 * xlrd
