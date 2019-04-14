@@ -22,7 +22,7 @@ class AccountSightInterface:
         """
         method used for submitting the report to accountsight
 
-        :param report: pandas.DataFrame 
+        :param report: pandas.DataFrame
         :return:
         """
         pass
