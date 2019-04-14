@@ -1,6 +1,7 @@
 #
 
 import argparse
+from module import *
 
 
 class AutoTSApp:
