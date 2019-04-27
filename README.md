@@ -6,6 +6,7 @@ Automate the workflow of submitting a timesheet to AccountSight from the Hours i
 autots is built on the shoulders of giants. The following open source packages are 
 required for autots to work.
 * Pandas
-* urllib
+* requests
+* json
 * argparse
 * xlrd
