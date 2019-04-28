@@ -1,6 +1,7 @@
 #
 
 import pandas as pd
+from io import StringIO
 import requests
 import json
 
@@ -22,19 +23,19 @@ class HoursInterface:
         self.session = requests.Session()
 
     @staticmethod
-    def prepare_data_for_requests_post(useremail, userpassword):
+    def prepare_data_for_requests_post(username, password):
         """
         Create bytes of request string to be passed to a requests.session.post() method as data parameter.
 
-        :param useremail: string that will be used to authenticate
-        :param userpassword: string that will be used as the password for the request
+        :param username: string that will be used to authenticate
+        :param password: string that will be used as the password for the request
         :return: bytes data that can be used as data argument for requests.session.post() method
         """
-        data = {"email": useremail,
-                "password": userpassword,
+        data = {"email": username,
+                "password": password,
                 "remember": True,
-                "deviceID": "web:" + useremail,
-                "devicename": "web:" + useremail}
+                "deviceID": "web:" + username,
+                "devicename": "web:" + username}
 
         # format dictionary as JSON
         data = json.dumps(data)
@@ -59,19 +60,47 @@ class HoursInterface:
 
         return r.ok
 
-    def download_detailed_report(self, period):
+    def download_summarized_report(self, start_timestamp, end_timestamp):
         """
 
-        :param period: string representing the period of the report to download (e.g. 'Daily', 'Weekly', etc.)
+        :param start_timestamp:
+        :param end_timestamp:
         :return:
         """
-        pass
+        result = dict()
 
-# TODO -- where should this actually live?
-    def standardize_time_sheet(self):
-        """
-        Transform the time sheet so that it meets the standards required for later use by autots.
+        data = {"startTimestamp": start_timestamp,
+                "endTimestamp": end_timestamp,
+                "type": "csv",
+                "timeZoneName": "America/New_York",
+                "client": None,
+                "project": None,
+                "task": None,
+                "person": None,
+                "team": None}
 
-        :return:
-        """
-        pass
+        # format dictionary as JSON
+        data = json.dumps(data)
+        # Convert to String
+        data = str(data)
+        # Convert string to byte
+        data = data.encode('utf-8')
+
+        url = "https://api2.hoursforteams.com/index.php/api/reports/export"
+
+        r = self.session.post(url, data=data)
+        result['fetch_export_url'] = r.ok
+
+        if r.ok:
+            next_url = r.json()['result']['file']
+            next_r = self.session.get(next_url)
+            result['download_csv'] = next_r.ok
+            if next_r.ok:
+                response_data = StringIO(next_r.text)
+                df = pd.read_csv(response_data)
+                result['data'] = df
+        else:
+            result['download_csv'] = False
+            result['data'] = None
+
+        return result
