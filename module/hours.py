@@ -103,5 +103,6 @@ class HoursInterface:
         else:
             result['download_csv'] = False
             result['data'] = None
+            result['fail_text'] = r.text
 
         return result
