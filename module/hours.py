@@ -47,7 +47,7 @@ class HoursInterface:
 
     def login(self, username, password):
         """
-        Creates self.session and attempts to login to start_url.
+        Using self.session, attempt to login to start_url.
 
         :param username: string that will be used to authenticate
         :param password: string that will be used as the password for the request
@@ -62,10 +62,12 @@ class HoursInterface:
 
     def download_summarized_report(self, start_timestamp, end_timestamp):
         """
+        Using self.session, first POST request to export url to retrieve the download url. Then GET download url and
+        return the data as pd.DataFrame.
 
         :param start_timestamp:
         :param end_timestamp:
-        :return:
+        :return: dict of status and data
         """
         result = dict()
 
@@ -85,7 +87,6 @@ class HoursInterface:
         data = str(data)
         # Convert string to byte
         data = data.encode('utf-8')
-
         url = "https://api2.hoursforteams.com/index.php/api/reports/export"
 
         r = self.session.post(url, data=data)
