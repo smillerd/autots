@@ -37,7 +37,7 @@ class AutoTSApp:
 
         print('Login Success!')
 
-        # nasty bit of code that retries the report download 5 times. This is to handle the inconsistency
+        # nasty bit of code that retries the report download up to 5 times. This is to handle the inconsistency
         retries = 5
         count = 0
         summarized_report_dict, summarized_report_df = dict(), pd.DataFrame()
