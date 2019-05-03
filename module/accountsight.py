@@ -17,16 +17,17 @@ class AccountSightInterface:
         self.session = requests.Session()
 
     @staticmethod
-    def prepare_data_for_requests_post(username, password):
+    def prepare_data_for_requests_post(username, password, company_id_form="aqn.accountsight.com"):
         """
         Create bytes of request string to be passed to a requests.session.post() method as data parameter.
 
         :param username: string that will be used to authenticate
         :param password: string that will be used as the password for the request
+        :param company_id_form: used to indicate the AccountSight account for which the request is related to
         :return: bytes data that can be used as data argument for requests.session.post() method
         """
         data = {"MIME Type": "application/x-www-form-urlencoded",
-                "companyIdForm": "aqn.accountsight.com",
+                "companyIdForm": company_id_form,
                 "userName": username,
                 "userPwd": password}
 
