@@ -97,8 +97,14 @@ class AutoTSApp:
                              sort=False)
         return out_data
 
-    def email_xl_report(self):
-        pass
+    @staticmethod
+    def email_xl_report(sender='millerd2seth@gmail.com',
+                        recipient='smillerd@aqnstrategies.com',
+                        attachment='/tmp/ts.xlsx'):
+        try:
+            EmailInterface(sender, recipient, attachment)
+        finally:
+            pass
 
     # def submit_ts_to_accountsight(self):
     #     pass
@@ -119,8 +125,9 @@ def main():
     parser.add_argument('end_date',
                         help='End date (UTC timezone) string, in \"%%Y-%%d-%%m\" form, e.g. \'2017-01-30\'')
     parser.add_argument('hoursforteams_username',
-                        help='the email address associated with your hoursforteams.com account')
-    # TODO add argument for report email address
+                        help='The email address associated with your hoursforteams.com account')
+    parser.add_argument('report_recipient',
+                        help='The email address that the summarized timesheet (\"report\") will be sent to')
 
     # parse the arguments from standard input
     args = parser.parse_args()
@@ -128,10 +135,13 @@ def main():
     ats = AutoTSApp(args.start_date, args.end_date, args.hoursforteams_username)
     data = ats.get_ts_from_hours()
     data_ready_for_email = ats.transform_and_agg_ts(data)
-    print(data_ready_for_email)
-    # TODO write this stuff:
+    # print(data_ready_for_email)
+
     # store as xlsx in tmp location
+    data_ready_for_email.to_excel('/tmp/ts.xlsx')
+
     # send email with report attachment
+    ats.email_xl_report(recipient=args.report_recipient, attachment='/tmp/ts.xlsx')
 
 
 if __name__ == "__main__":
