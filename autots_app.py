@@ -97,8 +97,11 @@ class AutoTSApp:
                              sort=False)
         return out_data
 
-    def submit_ts_to_accountsight(self):
+    def email_xl_report(self):
         pass
+
+    # def submit_ts_to_accountsight(self):
+    #     pass
 
 
 def main():
@@ -117,14 +120,18 @@ def main():
                         help='End date (UTC timezone) string, in \"%%Y-%%d-%%m\" form, e.g. \'2017-01-30\'')
     parser.add_argument('hoursforteams_username',
                         help='the email address associated with your hoursforteams.com account')
+    # TODO add argument for report email address
 
     # parse the arguments from standard input
     args = parser.parse_args()
 
     ats = AutoTSApp(args.start_date, args.end_date, args.hoursforteams_username)
     data = ats.get_ts_from_hours()
-    data_ready_for_upload = ats.transform_and_agg_ts(data)
-    print(data_ready_for_upload)
+    data_ready_for_email = ats.transform_and_agg_ts(data)
+    print(data_ready_for_email)
+    # TODO write this stuff:
+    # store as xlsx in tmp location
+    # send email with report attachment
 
 
 if __name__ == "__main__":
