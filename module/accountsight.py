@@ -26,18 +26,19 @@ class AccountSightInterface:
         :param company_id_form: used to indicate the AccountSight account for which the request is related to
         :return: bytes data that can be used as data argument for requests.session.post() method
         """
-        data = {"MIME Type": "application/x-www-form-urlencoded",
-                "companyIdForm": company_id_form,
-                "userName": username,
-                "userPwd": password}
-
-        # format dictionary as JSON
-        data = json.dumps(data)
-        # Convert to String
-        data = str(data)
-        # Convert string to byte
-        data = data.encode('utf-8')
-        return data
+        raise NotImplementedError
+        # data = {"MIME Type": "application/x-www-form-urlencoded",
+        #         "companyIdForm": company_id_form,
+        #         "userName": username,
+        #         "userPwd": password}
+        #
+        # # format dictionary as JSON
+        # data = json.dumps(data)
+        # # Convert to String
+        # data = str(data)
+        # # Convert string to byte
+        # data = data.encode('utf-8')
+        # return data
 
     def login(self, username, password):
         """
@@ -47,15 +48,16 @@ class AccountSightInterface:
         :param password: string that will be used as the password for the request
         :return: Bool indicating success/failure of login attempt
         """
-        data = self.prepare_data_for_requests_post(username, password)
-
-        # post request using session created at instantiation
-        r = self.session.post(self.start_url, data=data)
-
-        return r.ok
+        raise NotImplementedError
+        # data = self.prepare_data_for_requests_post(username, password)
+        #
+        # # post request using session created at instantiation
+        # r = self.session.post(self.start_url, data=data)
+        #
+        # return r.ok
 
     def download_summarized_report(self):
-        pass
+        raise NotImplementedError
 
     def submit_hours(self, report):
         """
@@ -64,4 +66,4 @@ class AccountSightInterface:
         :param report: pandas.DataFrame
         :return:
         """
-        pass
+        raise NotImplementedError
