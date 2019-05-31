@@ -4,6 +4,7 @@ import pandas as pd
 import argparse
 import datetime
 import getpass
+from secrets import hours_for_team_password
 from module import *
 
 
@@ -24,14 +25,20 @@ class AutoTSApp:
         dt = dt.timestamp()
         return dt
 
-    def get_ts_from_hours(self):
+    def get_ts_from_hours(self, secrets_file):
         """
         Login to hoursforteams.com and download timesheet for range from self.start_timestamp to self.end_timestamp
 
         :return:
         """
         hi = HoursInterface()
-        password = getpass.getpass(prompt='Password for hoursforteams.com [{}]'.format(self.hoursforteams_username))
+
+        # if secrets_file set, use password in secrets.py
+        if secrets_file:
+            password = hours_for_team_password
+        else:
+            password = getpass.getpass(prompt='Password for hoursforteams.com [{}]'.format(self.hoursforteams_username))
+
         if not hi.login(self.hoursforteams_username, password):
             raise ValueError("Unable to login, double check the password and try again")
 
@@ -151,12 +158,19 @@ def main():
                         help='The email address associated with your hoursforteams.com account')
     parser.add_argument('report_recipient',
                         help='The email address that the summarized timesheet (\"report\") will be sent to')
+    parser.add_argument(
+        '-s',
+        '--use_secrets_file',
+        help='when indicated, attempt to use a secrets.py file stored in project root directory to log into '
+             'hoursforteams.com',
+        action='store_true'
+    )
 
     # parse the arguments from standard input
     args = parser.parse_args()
 
     ats = AutoTSApp(args.start_date, args.end_date, args.hoursforteams_username)
-    data = ats.get_ts_from_hours()
+    data = ats.get_ts_from_hours(args.use_secrets_file)
     data_ready_for_email = ats.transform_and_agg_ts(data)
     # print(data_ready_for_email)
 
