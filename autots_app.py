@@ -64,14 +64,15 @@ class AutoTSApp:
     @staticmethod
     def transform_and_agg_ts(data):
         """
+        Note!!!! Assumes that the Project is just the 001 Customer
 
         :param data:
         :return:
         """
         # change field names to AccountSight field names
-        hoursforteams_accountsight_key = {"Client": "Customer",
-                                          "Project": "Project",
-                                          "Date": "Date",
+        hoursforteams_accountsight_key = {"Client": "Customer (*)",
+                                          "Project": "Task (*)",
+                                          "Date": "Date (*)",
                                           "Start": "Start Time",
                                           "End": "End Time",
                                           "Note": "Comments",
@@ -82,19 +83,41 @@ class AutoTSApp:
         out_data = data.rename(hoursforteams_accountsight_key, axis=1)
 
         # aggregate data into appropriate level for Accountsight
-        out_data = out_data.groupby(['Date', 'Customer', 'Project']).agg({'Hours': 'sum',
-                                                                          # 'Comments': 'sum'
-                                                                          })
+        out_data = out_data.groupby(['Date (*)', 'Customer (*)', 'Task (*)']).agg({'Hours': 'sum',
+                                                                                   # 'Comments': 'sum'
+                                                                                   })
         out_data.reset_index(level=[0, 1, 2], inplace=True)
 
         # transform date field into correct format for Accountsight
-        out_data['Date'] = out_data.apply(
-            lambda x: datetime.datetime.strptime(x['Date'], '%m/%d/%Y').strftime('%d-%b-%Y'),
+        out_data['Date (*)'] = out_data.apply(
+            lambda x: datetime.datetime.strptime(x['Date (*)'], '%m/%d/%Y').strftime('%d-%b-%Y'),
             axis=1)
 
         # create null columns for blank fields in AccountSight upload
-        out_data = pd.concat([out_data, pd.DataFrame(columns=['Task', 'Start Time', 'End Time', 'User ID/Email ID'])],
+        out_data = pd.concat([out_data, pd.DataFrame(columns=['Start Time', 'End Time', 'User ID/Email ID'])],
                              sort=False)
+
+        # assume that Project is 001 Customer, unless Customer is AQN
+        out_data['Project (*)'] = out_data.apply(
+            lambda x: '001 ' + x['Customer (*)'] if x['Customer (*)'] != 'AQN' else 'Internal',
+            axis=1
+        )
+
+        # set the comments
+        out_data['Comments'] = 'Automatically uploaded via autots (https://github.com/smillerd/autots)'
+
+        # reorder columns
+        out_data = out_data[['Date (*)',
+                             'Customer (*)',
+                             'Project (*)',
+                             'Task (*)',
+                             'Start Time',
+                             'End Time',
+                             'Hours',
+                             'Comments',
+                             'User ID/Email ID'
+                             ]]
+
         return out_data
 
     @staticmethod
@@ -138,7 +161,7 @@ def main():
     # print(data_ready_for_email)
 
     # store as xlsx in tmp location
-    data_ready_for_email.to_excel('/tmp/ts.xlsx')
+    data_ready_for_email.to_excel('/tmp/ts.xlsx', index=False)
 
     # send email with report attachment
     ats.email_xl_report(recipient=args.report_recipient, attachment='/tmp/ts.xlsx')
